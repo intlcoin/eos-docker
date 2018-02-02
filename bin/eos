@@ -8,7 +8,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DOCKER_DIR="$DIR/dkr"
 # FULL_DOCKER_DIR="$DIR/dkr_fullnode"
-DATADIR="$DIR/data"
+DATADIR="$DIR/../data"
 MOUNTDIR="/opt/eos/bin/data-dir"
 DOCKER_NAME="seed"
 
@@ -47,21 +47,21 @@ help() {
     echo
     echo "Commands: "
     echo "    start - starts eos container"
-    echo "    dlblocks - download and decompress the blockchain to speed up your first start"
+    # echo "    dlblocks - download and decompress the blockchain to speed up your first start"
     echo "    replay - starts eos container (in replay mode)"
     echo "    shm_size - resizes /dev/shm to size given, e.g. ./run.sh shm_size 10G "
     echo "    stop - stops eos container"
     echo "    status - show status of eos container"
     echo "    restart - restarts eos container"
-    echo "    install_docker - install docker"
-    echo "    install - pulls latest docker image from server (no compiling)"
-    echo "    install_full - pulls latest (FULL NODE FOR RPC) docker image from server (no compiling)"
-    echo "    rebuild - builds eos container (from docker file), and then restarts it"
-    echo "    build - only builds eos container (from docker file)"
+    # echo "    install_docker - install docker"
+    echo "    pull - pulls latest docker image from server (no compiling)"
+    # echo "    install_full - pulls latest (FULL NODE FOR RPC) docker image from server (no compiling)"
+    # echo "    rebuild - builds eos container (from docker file), and then restarts it"
+    # echo "    build - only builds eos container (from docker file)"
     echo "    logs - show all logs inc. docker logs, and eos logs"
     echo "    wallet - open cli_wallet in the container"
     echo "    remote_wallet - open cli_wallet in the container connecting to a remote seed"
-    echo "    enter - enter a bash session in the container"
+    echo "    shell - enter a bash session in the container"
     echo
     exit
 }
@@ -96,18 +96,18 @@ help() {
 #    echo "$ ./run.sh replay"
 #}
 
-install_docker() {
-    sudo apt update
-    sudo apt install curl git
-    curl https://get.docker.com | sh
-    if [ "$EUID" -ne 0 ]; then
-        echo "Adding user $(whoami) to docker group"
-        sudo usermod -aG docker $(whoami)
-        echo "IMPORTANT: Please re-login (or close and re-connect SSH) for docker to function correctly"
-    fi
-}
+# install_docker() {
+#     sudo apt update
+#     sudo apt install curl git
+#     curl https://get.docker.com | sh
+#     if [ "$EUID" -ne 0 ]; then
+#         echo "Adding user $(whoami) to docker group"
+#         sudo usermod -aG docker $(whoami)
+#         echo "IMPORTANT: Please re-login (or close and re-connect SSH) for docker to function correctly"
+#     fi
+# }
 
-install() {
+pull() {
     echo "Loading image from asp1d/eos"
     docker pull asp1d/eos
     echo "Tagging as eos"
@@ -162,7 +162,7 @@ stop() {
     docker rm $DOCKER_NAME
 }
 
-enter() {
+shell() {
     docker exec -it $DOCKER_NAME bash
 }
 
@@ -180,7 +180,7 @@ remote_wallet() {
 
 logs() {
     echo $BLUE"DOCKER LOGS: "$RESET
-    docker logs --tail=30 $DOCKER_NAME
+    docker logs -f --since 1s $DOCKER_NAME
     #echo $RED"INFO AND DEBUG LOGS: "$RESET
     #tail -n 30 $DATADIR/{info.log,debug.log}
 }
@@ -212,23 +212,23 @@ if [ "$#" -lt 1 ]; then
 fi
 
 case $1 in
-    build)
-        echo "You may want to use '$0 install' for a binary image instead, it's faster."
-        build
+    # build)
+    #     echo "You may want to use '$0 install' for a binary image instead, it's faster."
+    #     build
+    #     ;;
+    # build_full)
+    #     echo "You may want to use '$0 install_full' for a binary image instead, it's faster."
+    #     build_full
+    #     ;;
+    # install_docker)
+    #     install_docker
+    #     ;;
+    pull)
+        pull
         ;;
-    build_full)
-        echo "You may want to use '$0 install_full' for a binary image instead, it's faster."
-        build_full
-        ;;
-    install_docker)
-        install_docker
-        ;;
-    install)
-        install
-        ;;
-    install_full)
-        install_full
-        ;;
+    # install_full)
+    #     install_full
+    #     ;;
     start)
         start
         ;;
@@ -246,16 +246,16 @@ case $1 in
         sleep 5
         start
         ;;
-    rebuild)
-        stop
-        sleep 5
-        build
-        start
-        ;;
-    optimize)
-        echo "Applying recommended dirty write settings..."
-        optimize
-        ;;
+    # rebuild)
+    #     stop
+    #     sleep 5
+    #     build
+    #     start
+    #     ;;
+    # optimize)
+    #     echo "Applying recommended dirty write settings..."
+    #     optimize
+    #     ;;
     status)
         status
         ;;
@@ -271,11 +271,11 @@ case $1 in
         shift
         client "${@}"
         ;;
-    dlblocks)
-        dlblocks
-        ;;
-    enter)
-        enter
+    # dlblocks)
+    #     dlblocks
+    #     ;;
+    shell)
+        shell
         ;;
     logs)
         logs
