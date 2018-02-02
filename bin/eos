@@ -12,16 +12,6 @@ DATADIR="$DIR/../data"
 MOUNTDIR="/opt/eos/bin/data-dir"
 DOCKER_NAME="seed"
 
-BOLD="$(tput bold)"
-RED="$(tput setaf 1)"
-GREEN="$(tput setaf 2)"
-YELLOW="$(tput setaf 3)"
-BLUE="$(tput setaf 4)"
-MAGENTA="$(tput setaf 5)"
-CYAN="$(tput setaf 6)"
-WHITE="$(tput setaf 7)"
-RESET="$(tput sgr0)"
-
 # default. override in .env
 PORTS="9876"
 
@@ -134,7 +124,7 @@ seed_running() {
 }
 
 start() {
-    echo $GREEN"Starting container..."$RESET
+    echo "Starting container..."
     seed_exists
     if [[ $? == 0 ]]; then
         docker start $DOCKER_NAME
@@ -145,7 +135,7 @@ start() {
 
 replay() {
     echo "Removing old container"
-    docker rm $DOCKER_NAME
+    docker rm -f $DOCKER_NAME
     echo "Running eos with replay..."
     docker run ${DPORTS[@]} -v /dev/shm:/shm -v "$DATADIR":"$MOUNTDIR" -d --name $DOCKER_NAME -t eos eosd --replay
     echo "Started."
