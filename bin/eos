@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # EOS node manager
-# Released under GNU AGPL by Someguy123
+# Original release under GNU AGPL by Someguy123
+# Modified by Yanis Tsaunya
 #
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -99,7 +100,7 @@ install_docker() {
     sudo apt update
     sudo apt install curl git
     curl https://get.docker.com | sh
-    if [ "$EUID" -ne 0 ]; then 
+    if [ "$EUID" -ne 0 ]; then
         echo "Adding user $(whoami) to docker group"
         sudo usermod -aG docker $(whoami)
         echo "IMPORTANT: Please re-login (or close and re-connect SSH) for docker to function correctly"
@@ -107,10 +108,10 @@ install_docker() {
 }
 
 install() {
-    echo "Loading image from someguy123/eos"
-    docker pull someguy123/eos
+    echo "Loading image from asp1d/eos"
+    docker pull asp1d/eos
     echo "Tagging as eos"
-    docker tag someguy123/eos eos
+    docker tag asp1d/eos eos
     echo "Installation completed. You may now configure or run the server"
 }
 
@@ -185,12 +186,12 @@ logs() {
 }
 
 status() {
-    
+
     seed_exists
     if [[ $? == 0 ]]; then
         echo "Container exists?: "$GREEN"YES"$RESET
     else
-        echo "Container exists?: "$RED"NO (!)"$RESET 
+        echo "Container exists?: "$RED"NO (!)"$RESET
         echo "Container doesn't exist, thus it is NOT running. Run $0 build && $0 start"$RESET
         return
     fi
@@ -271,7 +272,7 @@ case $1 in
         client "${@}"
         ;;
     dlblocks)
-        dlblocks 
+        dlblocks
         ;;
     enter)
         enter
