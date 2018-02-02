@@ -108,10 +108,10 @@ help() {
 # }
 
 pull() {
-    echo "Loading image from asp1d/eos"
-    docker pull asp1d/eos
+    echo "Loading image from asp1d/eosio"
+    docker pull asp1d/eosio
     echo "Tagging as eos"
-    docker tag asp1d/eos eos
+    docker tag asp1d/eosio eos
     echo "Installation completed. You may now configure or run the server"
 }
 
@@ -139,7 +139,7 @@ start() {
     if [[ $? == 0 ]]; then
         docker start $DOCKER_NAME
     else
-        docker run ${DPORTS[@]} -v /dev/shm:/shm -v "$DATADIR":"$MOUNTDIR" -d --name $DOCKER_NAME -t eos start_eosd.sh
+        docker run ${DPORTS[@]} -v /dev/shm:/shm -v "$DATADIR":"$MOUNTDIR" -d --name $DOCKER_NAME -t eos start_eosiod.sh
     fi
 }
 
