@@ -7,22 +7,16 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DOCKER_DIR="$DIR/dkr"
-# FULL_DOCKER_DIR="$DIR/dkr_fullnode"
 DATADIR="$DIR/../data"
 MOUNTDIR="/opt/eos/bin/data-dir"
 DOCKER_NAME="seed"
 
 # default. override in .env
-PORTS="9876"
+PORTS="8888"
 
 if [[ -f .env ]]; then
     source .env
 fi
-
-#if [[ ! -f data/witness_node_data_dir/config.ini ]]; then
-#    echo "config.ini not found. copying example (seed)";
-#    cp data/witness_node_data_dir/config.ini.example data/witness_node_data_dir/config.ini
-#fi
 
 IFS=","
 DPORTS=()
@@ -37,17 +31,12 @@ help() {
     echo
     echo "Commands: "
     echo "    start - starts eos container"
-    # echo "    dlblocks - download and decompress the blockchain to speed up your first start"
     echo "    replay - starts eos container (in replay mode)"
     echo "    shm_size - resizes /dev/shm to size given, e.g. ./run.sh shm_size 10G "
     echo "    stop - stops eos container"
     echo "    status - show status of eos container"
     echo "    restart - restarts eos container"
-    # echo "    install_docker - install docker"
     echo "    pull - pulls latest docker image from server (no compiling)"
-    # echo "    install_full - pulls latest (FULL NODE FOR RPC) docker image from server (no compiling)"
-    # echo "    rebuild - builds eos container (from docker file), and then restarts it"
-    # echo "    build - only builds eos container (from docker file)"
     echo "    logs - show all logs inc. docker logs, and eos logs"
     echo "    wallet - open cli_wallet in the container"
     echo "    remote_wallet - open cli_wallet in the container connecting to a remote seed"
@@ -55,47 +44,6 @@ help() {
     echo
     exit
 }
-
-
-#build() {
-#    echo $GREEN"Building docker container"$RESET
-#    cd $DOCKER_DIR
-#    docker build -t eos .
-#}
-
-
-#dlblocks() {
-#    if [[ ! -d "$DATADIR/blockchain" ]]; then
-#        mkdir "$DATADIR/blockchain"
-#    fi
-#    echo "Removing old block log"
-#    sudo rm -f $DATADIR/witness_node_data_dir/blockchain/block_log
-#    sudo rm -f $DATADIR/witness_node_data_dir/blockchain/block_log.index
-#    echo "Download @gtg's block logs..."
-#    if [[ ! $(command -v xz) ]]; then
-#        echo "XZ not found. Attempting to install..."
-#        sudo apt update
-#        sudo apt install -y xz-utils
-#    fi
-#    wget https://gtg.eos.house/get/blockchain.xz/block_log.xz -O $DATADIR/witness_node_data_dir/blockchain/block_log.xz
-#    echo "Decompressing block log... this may take a while..."
-#    xz -d $DATADIR/witness_node_data_dir/blockchain/block_log.xz
-#    echo "FINISHED. Blockchain downloaded and decompressed"
-#    echo "Remember to resize your /dev/shm, and run with replay!"
-#    echo "$ ./run.sh shm_size SIZE (e.g. 8G)"
-#    echo "$ ./run.sh replay"
-#}
-
-# install_docker() {
-#     sudo apt update
-#     sudo apt install curl git
-#     curl https://get.docker.com | sh
-#     if [ "$EUID" -ne 0 ]; then
-#         echo "Adding user $(whoami) to docker group"
-#         sudo usermod -aG docker $(whoami)
-#         echo "IMPORTANT: Please re-login (or close and re-connect SSH) for docker to function correctly"
-#     fi
-# }
 
 pull() {
     echo "Loading image from asp1d/eosio"
@@ -147,7 +95,7 @@ shm_size() {
 }
 
 stop() {
-    echo $RED"Stopping container..."$RESET
+    echo "Stopping container..."
     docker stop $DOCKER_NAME
     docker rm $DOCKER_NAME
 }
@@ -157,11 +105,11 @@ shell() {
 }
 
 wallet() {
-    docker exec -it $DOCKER_NAME eosc wallet "${@}"
+    docker exec -it $DOCKER_NAME eosioc wallet "${@}"
 }
 
 client() {
-    docker exec -it $DOCKER_NAME eosc "${@}"
+    docker exec -it $DOCKER_NAME eosioc "${@}"
 }
 
 remote_wallet() {
@@ -169,29 +117,27 @@ remote_wallet() {
 }
 
 logs() {
-    echo $BLUE"DOCKER LOGS: "$RESET
+    echo "DOCKER LOGS: "
     docker logs -f --since 1s $DOCKER_NAME
-    #echo $RED"INFO AND DEBUG LOGS: "$RESET
-    #tail -n 30 $DATADIR/{info.log,debug.log}
 }
 
 status() {
 
     seed_exists
     if [[ $? == 0 ]]; then
-        echo "Container exists?: "$GREEN"YES"$RESET
+        echo "Container exists?: YES"
     else
-        echo "Container exists?: "$RED"NO (!)"$RESET
-        echo "Container doesn't exist, thus it is NOT running. Run $0 build && $0 start"$RESET
+        echo "Container exists?: NO (!)"
+        echo "Container doesn't exist, thus it is NOT running. Run $0 build && $0 start"
         return
     fi
 
     seed_running
     if [[ $? == 0 ]]; then
-        echo "Container running?: "$GREEN"YES"$RESET
+        echo "Container running?: YES"
     else
-        echo "Container running?: "$RED"NO (!)"$RESET
-        echo "Container isn't running. Start it with $0 start"$RESET
+        echo "Container running?: NO (!)"
+        echo "Container isn't running. Start it with $0 start"
         return
     fi
 
@@ -202,23 +148,10 @@ if [ "$#" -lt 1 ]; then
 fi
 
 case $1 in
-    # build)
-    #     echo "You may want to use '$0 install' for a binary image instead, it's faster."
-    #     build
-    #     ;;
-    # build_full)
-    #     echo "You may want to use '$0 install_full' for a binary image instead, it's faster."
-    #     build_full
-    #     ;;
-    # install_docker)
-    #     install_docker
-    #     ;;
+
     pull)
         pull
         ;;
-    # install_full)
-    #     install_full
-    #     ;;
     start)
         start
         ;;
@@ -236,16 +169,6 @@ case $1 in
         sleep 5
         start
         ;;
-    # rebuild)
-    #     stop
-    #     sleep 5
-    #     build
-    #     start
-    #     ;;
-    # optimize)
-    #     echo "Applying recommended dirty write settings..."
-    #     optimize
-    #     ;;
     status)
         status
         ;;
@@ -261,9 +184,6 @@ case $1 in
         shift
         client "${@}"
         ;;
-    # dlblocks)
-    #     dlblocks
-    #     ;;
     shell)
         shell
         ;;
