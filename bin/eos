@@ -12,7 +12,7 @@ MOUNTDIR="/opt/eos/bin/data-dir"
 DOCKER_NAME="seed"
 
 # default. override in .env
-PORTS="8888"
+PORTS="8888,9876"
 
 if [[ -f .env ]]; then
     source .env
@@ -47,7 +47,7 @@ help() {
 
 pull() {
     echo "Loading image from asp1d/eosio"
-    docker pull asp1d/eosio
+    docker pull asp1d/eosio:020218
     echo "Tagging as eos"
     docker tag asp1d/eosio eos
     echo "Installation completed. You may now configure or run the server"
