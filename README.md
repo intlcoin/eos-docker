@@ -36,5 +36,5 @@ Commands:
     shell - enter a bash session in the container
 ```
 ## Contributing
-
+Thanks for idea to https://github.com/Someguy123
 Bug reports and pull requests are welcome on GitHub at https://github.com/intlcoin/eos-docker.
